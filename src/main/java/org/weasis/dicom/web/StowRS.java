@@ -11,12 +11,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import javax.json.Json;
 import javax.json.stream.JsonGenerator;
@@ -53,6 +48,15 @@ public class StowRS implements AutoCloseable {
 
         private ContentType(String type) {
             this.type = type;
+        }
+
+        public static ContentType from(String contentMimeType) {
+            for (ContentType contentType : EnumSet.allOf(ContentType.class)) {
+                if (contentMimeType.equals(contentType.toString())) {
+                    return contentType;
+                }
+            }
+            throw new IllegalArgumentException("Unknown mime type");
         }
 
         @Override

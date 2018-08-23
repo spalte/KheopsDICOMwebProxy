@@ -18,7 +18,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class DICOMMetadataPart extends Part {
+public class DICOMMetadataPart extends Part {
     private final Attributes dataset;
     private final Set<String> bulkDataLocations;
 

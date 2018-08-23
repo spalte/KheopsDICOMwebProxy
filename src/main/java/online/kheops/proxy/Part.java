@@ -10,7 +10,7 @@ import java.util.Map;
 
 
 // a Part can be streamed out using the STOWService
-public abstract class Part implements Closeable {
+public abstract class Part implements AutoCloseable {
     private final MediaType mediaType;
 
     protected Part(MediaType mediaType) {

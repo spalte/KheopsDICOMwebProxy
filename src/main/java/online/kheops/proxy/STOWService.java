@@ -2,27 +2,44 @@ package online.kheops.proxy;
 
 
 import org.dcm4che3.data.Attributes;
+import org.weasis.dicom.web.StowRS;
 
-import javax.ws.rs.core.MediaType;
-import java.net.URI;
+import java.io.IOException;
 
-// used to send data to the PACS
-public final class STOWService implements AutoCloseable {
+public final class STOWService {
+    private final StowRS stowRS;
 
-    STOWService(URI stowUri, MediaType mediaType) {
+    STOWService(StowRS stowRS) {
+        this.stowRS = stowRS;
+    }
+
+    public void write(Part part) throws STOWGatewayException {
+        if (part instanceof DICOMPart) {
+            writeDICOM((DICOMPart) part);
+        } else if (part instanceof DICOMMetadataPart) {
+            writeMetadata((DICOMMetadataPart) part);
+        } else if (part instanceof BulkDataPart) {
+            writeBulkData((BulkDataPart) part);
+        } else {
+            throw new ClassCastException("Unable to cast the part to a known Part class");
+        }
+    }
+
+
+    public void writeBulkData(BulkDataPart bulkDataPart) {
+
+    }
+    public void writeMetadata(DICOMMetadataPart bulkDataPart) {
 
     }
 
-    public void write(Part part) {
+    public void writeDICOM(DICOMPart bulkDataPart) {
 
     }
 
-    public void write(Attributes attributes, String tsuid) {
+
+    public Attributes getResponse() throws IOException {
 
     }
 
-    @Override
-    public void close() throws Exception {
-
-    }
 }

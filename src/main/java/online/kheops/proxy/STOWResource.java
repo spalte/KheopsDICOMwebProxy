@@ -1,58 +1,66 @@
 package online.kheops.proxy;
 
 import org.dcm4che3.data.Attributes;
-import org.dcm4che3.io.DicomInputStream;
-import org.dcm4che3.mime.MultipartInputStream;
-import org.dcm4che3.mime.MultipartParser;
+import org.weasis.dicom.web.StowRS;
 
+import javax.servlet.ServletContext;
 import javax.ws.rs.*;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Path("/studies")
 public class STOWResource {
+    private static final Logger LOG = Logger.getLogger(STOWResource.class.getName());
+
+    @Context
+    ServletContext context;
 
     @HeaderParam("Content-Type")
-    private MediaType contentType;
+    MediaType contentType;
 
     @PUT
     @Path("/studies")
     @Consumes("multipart/related")
-    public void stow(@Suspended AsyncResponse ar, InputStream in) {
-        MultipartParser multipartParser = new MultipartParser(boundary());
-        try {
-            multipartParser.parse(in, (int pn, MultipartInputStream multipartInputStream) -> digestDicomFile(multipartInputStream));
-        } catch (IOException e) {
-            throw new WebApplicationException("ioexception", e);
+    public Attributes stow(InputStream inputStream) {
+        final URI STOWServiceURI = getParameterURI("online.kheops.pacs.uri");
+        final URI authorizationURI = getParameterURI("online.kheops.auth_server.uri");
+
+        try (StowRS stowRS = new StowRS(STOWServiceURI.toString(), getStowContentType())) {
+            STOWService stowService = new STOWService(stowRS);
+            return new STOWProxy(contentType, inputStream, stowService, new AuthorizationManager(authorizationURI)).getResponse();
+        } catch (STOWGatewayException e) {
+            LOG.log(Level.SEVERE, "Gateway Error", e);
+            throw new WebApplicationException(Response.Status.BAD_GATEWAY);
+        } catch (STOWRequestException e) {
+            LOG.log(Level.WARNING, "Bad request Error", e);
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Error in the proxy", e);
+            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
         }
-
-
     }
 
-    private void digestDicomFile(MultipartInputStream inputStream)
-            throws IOException {
-
-        Map<String, List<String>> headerParams = inputStream.readHeaderParams();
-        DicomInputStream dicomInputStream = new DicomInputStream(inputStream);
-
-        Attributes attributes = dicomInputStream.readDataset(-1, -1);
-
-
-
-
+    private StowRS.ContentType getStowContentType() {
+        try {
+            return StowRS.ContentType.from(contentType.getType());
+        } catch (IllegalArgumentException e) {
+            LOG.log(Level.WARNING, "Bad request Error", e);
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        }
     }
 
-    private String boundary() {
-        String boundary = contentType.getParameters().get("boundary");
-        if (boundary == null)
-            throw new WebApplicationException("Missing Boundary Parameter", Response.Status.BAD_REQUEST);
-
-        return boundary;
+    private URI getParameterURI(String parameter) {
+        try {
+            return new URI(context.getInitParameter("online.kheops.pacs.uri"));
+        } catch (URISyntaxException e) {
+            LOG.log(Level.SEVERE, "Error with the STOWServiceURI", e);
+            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
 }
