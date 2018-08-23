@@ -28,6 +28,11 @@ repositories {
         //noinspection GroovyAssignabilityCheck
         url "https://www.dcm4che.org/maven2/"
     }
+
+    maven {
+        //noinspection GroovyAssignabilityCheck
+        url "https://raw.github.com/nroduit/mvn-repo/master/"
+    }
 }
 
 dependencies {
@@ -36,6 +41,8 @@ dependencies {
     compile group: 'org.glassfish.jersey.media', name: 'jersey-media-moxy', version: '2.27'
 
     compile group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart', version: '2.27'
+
+    compile group: 'org.weasis.core', name: 'weasis-core-util', version: '3.0.1'
 
     compile (group: 'org.dcm4che', name: 'dcm4che-dcmr', version: '5.13.0') {
         exclude module: 'slf4j-log4j12'
