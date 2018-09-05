@@ -1,5 +1,6 @@
 package online.kheops.proxy;
 
+import online.kheops.proxy.part.Part;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.mime.MultipartInputStream;
 import org.dcm4che3.mime.MultipartParser;

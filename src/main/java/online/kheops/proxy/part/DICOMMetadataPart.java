@@ -1,5 +1,7 @@
-package online.kheops.proxy;
+package online.kheops.proxy.part;
 
+import online.kheops.proxy.ContentLocation;
+import online.kheops.proxy.SeriesID;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.BulkData;
 import org.dcm4che3.io.SAXReader;
@@ -16,14 +18,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 public class DICOMMetadataPart extends Part {
     private final Attributes dataset;
-    private final Set<String> bulkDataLocations;
+    private final Set<ContentLocation> bulkDataLocations;
 
 
-    protected DICOMMetadataPart(InputStream inputStream, MediaType mediaType) throws IOException {
+    DICOMMetadataPart(InputStream inputStream, MediaType mediaType) throws IOException {
         super(mediaType);
 
         if (MediaTypes.equalsIgnoreParameters(mediaType, MediaTypes.APPLICATION_DICOM_XML_TYPE)) {
@@ -50,26 +53,26 @@ public class DICOMMetadataPart extends Part {
         }
     }
 
-    protected DICOMMetadataPart(Attributes dataset, MediaType mediaType) throws IOException {
+    DICOMMetadataPart(Attributes dataset, MediaType mediaType) throws IOException {
         super(mediaType);
         this.dataset = dataset;
         this.bulkDataLocations = Collections.emptySet();
     }
 
-    public SeriesID getSeriesID() {
-        return SeriesID.from(dataset);
+    public Optional<SeriesID> getSeriesID() {
+        return Optional.of(SeriesID.from(dataset));
     }
 
     public String getTransferSyntax() {
         return MediaTypes.getTransferSyntax(getMediaType());
     }
 
-    private Set<String> parseBulkDataLocations() throws Exception {
-        Set<String> bulkDataLocations = new HashSet<>();
+    private Set<ContentLocation> parseBulkDataLocations() throws Exception {
+        Set<ContentLocation> bulkDataLocations = new HashSet<>();
 
         dataset.accept((attrs1, tag, vr, value) -> {
             if (value instanceof BulkData) {
-                bulkDataLocations.add(((BulkData) value).getURI());
+                bulkDataLocations.add(ContentLocation.valueOf(((BulkData) value).getURI()));
             }
             return false;
         }, true);
@@ -77,7 +80,7 @@ public class DICOMMetadataPart extends Part {
         return bulkDataLocations;
     }
 
-    public Set<String> getBulkDataLocations() {
+    public Set<ContentLocation> getBulkDataLocations() {
         return bulkDataLocations;
     }
 

@@ -1,4 +1,4 @@
-package online.kheops.proxy;
+package online.kheops.proxy.part;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.io.DicomInputStream;
@@ -17,21 +17,21 @@ public class DICOMPart extends DICOMMetadataPart {
         private final Attributes fileMetaInformation;
         private final File bulkDataDirectory;
 
-        public ParsedData(Attributes dataset, Attributes fileMetaInformation, File bulkDataDirectory) {
+        ParsedData(Attributes dataset, Attributes fileMetaInformation, File bulkDataDirectory) {
             this.dataset = dataset;
             this.fileMetaInformation = fileMetaInformation;
             this.bulkDataDirectory = bulkDataDirectory;
         }
 
-        public Attributes getDataset() {
+        Attributes getDataset() {
             return dataset;
         }
 
-        public Attributes getFileMetaInformation() {
+        Attributes getFileMetaInformation() {
             return fileMetaInformation;
         }
 
-        public File getBulkDataDirectory() {
+        File getBulkDataDirectory() {
             return bulkDataDirectory;
         }
     }
@@ -43,7 +43,7 @@ public class DICOMPart extends DICOMMetadataPart {
         this.bulkDataDirectory = parsedData.getBulkDataDirectory();
     }
 
-    protected DICOMPart(InputStream inputStream, MediaType mediaType) throws IOException {
+    DICOMPart(InputStream inputStream, MediaType mediaType) throws IOException {
         this(parseInputStream(inputStream), mediaType);
     }
 

@@ -10,11 +10,20 @@
         <servlet-name>online.kheops.proxy.STOWResource</servlet-name>
     </servlet>
 
+    <filter>
+        <filter-name>ServletFilter</filter-name>
+        <filter-class>online.kheops.proxy.FixTypeQuoteFilter</filter-class>
+    </filter>
+
     <servlet-mapping>
         <servlet-name>online.kheops.proxy.STOWResource</servlet-name>
         <url-pattern>/capabilities</url-pattern>
     </servlet-mapping>
 
+    <filter-mapping>
+        <filter-name>ServletFilter</filter-name>
+        <url-pattern>/capabilities/*</url-pattern>
+    </filter-mapping>
 
     <context-param>
         <description>Base URI for the pacs</description>

@@ -1,6 +1,10 @@
 package online.kheops.proxy;
 
 
+import online.kheops.proxy.part.BulkDataPart;
+import online.kheops.proxy.part.DICOMMetadataPart;
+import online.kheops.proxy.part.DICOMPart;
+import online.kheops.proxy.part.Part;
 import org.dcm4che3.data.Attributes;
 import org.weasis.dicom.web.StowRS;
 

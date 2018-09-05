@@ -1,12 +1,6 @@
 package org.weasis.dicom.web;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
@@ -52,7 +46,7 @@ public class StowRS implements AutoCloseable {
 
         public static ContentType from(String contentMimeType) {
             for (ContentType contentType : EnumSet.allOf(ContentType.class)) {
-                if (contentMimeType.equals(contentType.toString())) {
+                if (contentMimeType.equals(contentType.type)) {
                     return contentType;
                 }
             }
@@ -63,6 +57,10 @@ public class StowRS implements AutoCloseable {
         public String toString() {
             return type;
         }
+    }
+
+    public interface StreamingOutput {
+        void write(OutputStream outputStream) throws IOException;
     }
 
     private final ContentType contentType;
@@ -212,6 +210,11 @@ public class StowRS implements AutoCloseable {
             dos.write(buf, 0, offset);
         }
         dos.flush();
+    }
+
+    public void uploadStream(StreamingOutput streamingOutput) throws IOException {
+        writeContentMarkers();
+        streamingOutput.write(out);
     }
 
     public void uploadDicom(Attributes metadata, String tsuid) throws IOException {
