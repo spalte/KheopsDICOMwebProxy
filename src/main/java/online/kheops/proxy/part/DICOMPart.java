@@ -1,6 +1,7 @@
 package online.kheops.proxy.part;
 
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
 import org.dcm4che3.io.DicomInputStream;
 
 import javax.ws.rs.core.MediaType;
@@ -65,7 +66,7 @@ public class DICOMPart extends DICOMMetadataPart {
 
     @Override
     public String getTransferSyntax() {
-        throw new UnsupportedOperationException("Non JSON/XML DICOM parts don't track the transfer syntax");
+        return fileMetaInformation.getString(Tag.TransferSyntaxUID);
     }
 
     @Override

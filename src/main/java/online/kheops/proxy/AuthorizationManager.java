@@ -14,9 +14,11 @@ public final class AuthorizationManager {
     private final Set<SeriesID> authorizedSeriesIDs = new HashSet<>();
     private final Set<ContentLocation> authorizedContentLocations = new HashSet<>();
     private final URI authorizationUri;
+    private final String bearerToken;
 
-    public AuthorizationManager(URI authorizationUri) {
+    public AuthorizationManager(URI authorizationUri, String bearerToken) {
         this.authorizationUri = authorizationUri;
+        this.bearerToken = bearerToken;
     }
 
     // Returns true if acquiring the authorization was successful

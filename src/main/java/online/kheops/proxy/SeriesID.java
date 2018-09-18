@@ -1,6 +1,7 @@
 package online.kheops.proxy;
 
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
 import org.glassfish.jersey.media.multipart.MultiPart;
 
 public class SeriesID extends MultiPart {
@@ -13,8 +14,7 @@ public class SeriesID extends MultiPart {
     }
 
     public static SeriesID from(Attributes attributes) {
-        // TODO
-        return null;
+        return new SeriesID(attributes.getString(Tag.StudyInstanceUID), attributes.getString(Tag.SeriesInstanceUID));
     }
 
     public String getStudyUID() {

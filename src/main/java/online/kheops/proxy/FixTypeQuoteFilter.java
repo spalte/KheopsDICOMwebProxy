@@ -28,7 +28,7 @@ public class FixTypeQuoteFilter implements Filter {
 
         // find if the request has missing quotes
         final String contentType = httpRequest.getHeader(HttpHeaders.CONTENT_TYPE);
-        if (contentType.contains("type=application/dicom")){
+        if (contentType != null && contentType.contains("type=application/dicom")){
             final String newContentType = contentType.replace("type=application/dicom", "type=\"application/dicom\"");
 
             finalRequest = new HttpServletRequestWrapper(httpRequest) {

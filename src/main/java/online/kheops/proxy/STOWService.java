@@ -6,8 +6,11 @@ import online.kheops.proxy.part.DICOMMetadataPart;
 import online.kheops.proxy.part.DICOMPart;
 import online.kheops.proxy.part.Part;
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.io.SAXReader;
 import org.weasis.dicom.web.StowRS;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 
 public final class STOWService {
@@ -37,14 +40,23 @@ public final class STOWService {
 
     }
 
-    public void writeDICOM(DICOMPart bulkDataPart) {
-
+    public void writeDICOM(DICOMPart dicomPart) throws STOWGatewayException {
+        try {
+            stowRS.uploadDicom(dicomPart.getDataset(), dicomPart.getTransferSyntax());
+        } catch (IOException e) {
+            throw new STOWGatewayException("Failed to store DICOMPart", e);
+        }
     }
 
 
     public Attributes getResponse() throws IOException {
-        // TODO
-        return null;
+
+        final String responseString = stowRS.writeEndMarkers();
+        try {
+            return SAXReader.parse(responseString);
+        } catch (ParserConfigurationException | SAXException e) {
+            throw new IOException("Error parsing response", e);
+        }
     }
 
 }
