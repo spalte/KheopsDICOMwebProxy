@@ -43,7 +43,8 @@ public final class STOWService {
 
 
     public Attributes getResponse() throws IOException {
-
+        // TODO
+        return null;
     }
 
 }

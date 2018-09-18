@@ -13,7 +13,8 @@ public class SeriesID extends MultiPart {
     }
 
     public static SeriesID from(Attributes attributes) {
-
+        // TODO
+        return null;
     }
 
     public String getStudyUID() {

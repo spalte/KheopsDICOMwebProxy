@@ -17,23 +17,23 @@
 
     <servlet-mapping>
         <servlet-name>online.kheops.proxy.STOWResource</servlet-name>
-        <url-pattern>/capabilities</url-pattern>
+        <url-pattern>/dicomweb</url-pattern>
     </servlet-mapping>
 
     <filter-mapping>
         <filter-name>ServletFilter</filter-name>
-        <url-pattern>/capabilities/*</url-pattern>
+        <url-pattern>/dicomweb/*</url-pattern>
     </filter-mapping>
 
     <context-param>
         <description>Base URI for the pacs</description>
         <param-name>online.kheops.pacs.uri</param-name>
-        <param-value>http://localhost:8080/dcm4chee-arc/aets/DCM4CHEE/rs</param-value>
+        <param-value>https://test.kheops.online/dicomweb</param-value>
     </context-param>
     <context-param>
         <description>Base URI for the authentication server</description>
         <param-name>online.kheops.auth_server.uri</param-name>
-        <param-value>http://localhost:7575</param-value>
+        <param-value>https://test.kheops.online/authorization</param-value>
     </context-param>
 
 

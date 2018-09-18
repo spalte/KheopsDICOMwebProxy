@@ -14,7 +14,7 @@ import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Path("/studies")
+@Path("/")
 public class STOWResource {
     private static final Logger LOG = Logger.getLogger(STOWResource.class.getName());
 
@@ -24,9 +24,15 @@ public class STOWResource {
     @HeaderParam("Content-Type")
     MediaType contentType;
 
-    @PUT
+    @GET
+    @Path("/stupid")
+    public String stupid() {
+        return "stupid";
+    }
+
+    @POST
     @Path("/studies")
-    @Consumes("multipart/related")
+//    @Consumes("multipart/related")
     public Attributes stow(InputStream inputStream) {
         final URI STOWServiceURI = getParameterURI("online.kheops.pacs.uri");
         final URI authorizationURI = getParameterURI("online.kheops.auth_server.uri");
@@ -57,7 +63,7 @@ public class STOWResource {
 
     private URI getParameterURI(String parameter) {
         try {
-            return new URI(context.getInitParameter("online.kheops.pacs.uri"));
+            return new URI(context.getInitParameter(parameter));
         } catch (URISyntaxException e) {
             LOG.log(Level.SEVERE, "Error with the STOWServiceURI", e);
             throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
