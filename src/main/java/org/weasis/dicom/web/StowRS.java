@@ -103,9 +103,7 @@ public class StowRS implements AutoCloseable {
                 contentType == ContentType.JSON ? ContentType.JSON.toString() : ContentType.XML.toString());
 
             if (StringUtil.hasText(authentication)) {
-                // Authorization header
-                String encodedAuthorization = Base64.getEncoder().encodeToString(authentication.getBytes());
-                httpPost.setRequestProperty("Authorization", "Basic " + encodedAuthorization);
+                httpPost.setRequestProperty("Authorization", authentication);
             }
 
             out = new DataOutputStream(httpPost.getOutputStream());
@@ -185,7 +183,8 @@ public class StowRS implements AutoCloseable {
         out.close();
 
         LOGGER.info("STOWRS end markers: server response: {}", httpPost.getResponseMessage()); //$NON-NLS-1$
-        if (httpPost.getResponseCode() == HttpURLConnection.HTTP_ACCEPTED) { // Failed or Warning
+        if (httpPost.getResponseCode() == HttpURLConnection.HTTP_ACCEPTED ||
+                httpPost.getResponseCode() == HttpURLConnection.HTTP_OK) { // Failed or Warning
             // See http://dicom.nema.org/medical/dicom/current/output/chtml/part18/sect_6.6.html#table_6.6.1-1
             StringBuilder response = new StringBuilder();
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(httpPost.getInputStream()))) {
@@ -195,6 +194,28 @@ public class StowRS implements AutoCloseable {
                 }
                 return response.toString();
             }
+        } else {
+            LOGGER.info("response code: {}", httpPost.getResponseCode()); //$NON-NLS-1$
+        }
+        return null;
+    }
+
+    public InputStream writeEndMarkersGetInputStream() throws IOException {
+        // Final part segment
+        out.writeBytes(CRLF);
+        out.writeBytes(BOUNDARY_PREFIX);
+        out.writeBytes(MULTIPART_BOUNDARY);
+        out.writeBytes(BOUNDARY_PREFIX);
+        out.flush();
+        out.close();
+
+        LOGGER.info("STOWRS end markers: server response: {}", httpPost.getResponseMessage()); //$NON-NLS-1$
+        if (httpPost.getResponseCode() == HttpURLConnection.HTTP_ACCEPTED ||
+                httpPost.getResponseCode() == HttpURLConnection.HTTP_OK) { // Failed or Warning
+            // See http://dicom.nema.org/medical/dicom/current/output/chtml/part18/sect_6.6.html#table_6.6.1-1
+            return httpPost.getInputStream();
+        } else {
+            LOGGER.info("response code: {}", httpPost.getResponseCode()); //$NON-NLS-1$
         }
         return null;
     }

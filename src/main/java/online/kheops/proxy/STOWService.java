@@ -50,10 +50,8 @@ public final class STOWService {
 
 
     public Attributes getResponse() throws IOException {
-
-        final String responseString = stowRS.writeEndMarkers();
         try {
-            return SAXReader.parse(responseString);
+            return SAXReader.parse(stowRS.writeEndMarkersGetInputStream());
         } catch (ParserConfigurationException | SAXException e) {
             throw new IOException("Error parsing response", e);
         }

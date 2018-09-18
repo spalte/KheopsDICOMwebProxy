@@ -38,7 +38,7 @@ public final class AuthorizationManager {
 
     public Attributes patchAttributes(Attributes attributes) {
         // TODO
-        return null;
+        return attributes;
     }
 
     private void getAuthorization(SeriesID seriesID) throws AuthorizationManagerException{

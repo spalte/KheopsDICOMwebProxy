@@ -1,5 +1,8 @@
 package online.kheops.proxy;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTCreator;
+import com.auth0.jwt.algorithms.Algorithm;
 import org.dcm4che3.data.Attributes;
 import org.weasis.dicom.web.StowRS;
 
@@ -9,15 +12,19 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Path("/")
-public class STOWResource {
+public final class STOWResource {
     private static final Logger LOG = Logger.getLogger(STOWResource.class.getName());
 
     @Context
@@ -29,6 +36,7 @@ public class STOWResource {
     @POST
     @Path("/studies")
     @Consumes("multipart/related")
+    @Produces("application/dicom+json")
     public Attributes stow(InputStream inputStream, @HeaderParam("Authorization") String AuthorizationHeader) {
         final String token;
         if (AuthorizationHeader != null) {
@@ -66,6 +74,7 @@ public class STOWResource {
     @POST
     @Path("/capability/{capability}/studies")
     @Consumes("multipart/related")
+    @Produces("application/dicom+json")
     public Attributes stowWithCapability(InputStream inputStream, @PathParam("capability") String capabilityToken) {
         return store(inputStream, capabilityToken);
     }
@@ -74,7 +83,7 @@ public class STOWResource {
         final URI STOWServiceURI = getParameterURI("online.kheops.pacs.uri");
         final URI authorizationURI = getParameterURI("online.kheops.auth_server.uri");
 
-        try (StowRS stowRS = new StowRS(STOWServiceURI.toString(), getStowContentType())) {
+        try (StowRS stowRS = new StowRS(STOWServiceURI.toString() + "/studies", getStowContentType(), null, "Bearer " + getPostBearerToken())) {
             STOWService stowService = new STOWService(stowRS);
             return new STOWProxy(contentType, inputStream, stowService, new AuthorizationManager(authorizationURI, bearerToken)).getResponse();
         } catch (STOWGatewayException e) {
@@ -100,8 +109,6 @@ public class STOWResource {
         }
     }
 
-
-
     private URI getParameterURI(String parameter) {
         try {
             return new URI(context.getInitParameter(parameter));
@@ -109,5 +116,23 @@ public class STOWResource {
             LOG.log(Level.SEVERE, "Error with the STOWServiceURI", e);
             throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private String getPostBearerToken() {
+        final String authSecret = context.getInitParameter("online.kheops.auth.hmacsecretpost");
+        final Algorithm algorithmHMAC;
+        try {
+            algorithmHMAC = Algorithm.HMAC256(authSecret);
+        } catch (UnsupportedEncodingException e) {
+            LOG.log(Level.SEVERE, "online.kheops.auth.hmacsecretpost is not a valid HMAC secret", e);
+            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+        }
+
+        JWTCreator.Builder jwtBuilder = JWT.create()
+                .withIssuer("auth.kheops.online")
+                .withAudience("dicom.kheops.online")
+                .withExpiresAt(Date.from(Instant.now().plus(1, ChronoUnit.HOURS)));
+
+        return jwtBuilder.sign(algorithmHMAC);
     }
 }

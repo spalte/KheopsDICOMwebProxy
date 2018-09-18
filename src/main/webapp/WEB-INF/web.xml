@@ -25,6 +25,11 @@
         <param-name>online.kheops.auth_server.uri</param-name>
         <param-value>https://test.kheops.online/authorization</param-value>
     </context-param>
+    <context-param>
+        <description>HMAC shared secret used to sign tokens used for post</description>
+        <param-name>online.kheops.auth.hmacsecretpost</param-name>
+        <param-value>P47dnfP28ptS/uzuuvEACmPYdMiOtFNLXiWTIwNNPgUjrvTgF/JCh3qZi47sIcpeZaUXw132mfmR4q5K/fwepA==</param-value>
+    </context-param>
 
 
 </web-app>
