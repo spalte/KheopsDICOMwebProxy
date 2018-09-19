@@ -93,9 +93,10 @@ public class StowRS implements AutoCloseable {
             httpPost.setUseCaches(false);
             httpPost.setDoOutput(true);// indicates POST method
             httpPost.setDoInput(true);
+            httpPost.setChunkedStreamingMode(4096);
             httpPost.setRequestMethod("POST");
-            httpPost.setConnectTimeout(5000);
-            httpPost.setReadTimeout(5000);
+            httpPost.setConnectTimeout(180000);
+            httpPost.setReadTimeout(180000);
             httpPost.setRequestProperty("Content-Type", //$NON-NLS-1$
                 "multipart/related; type=\"" + contentType + "\"; boundary=" + MULTIPART_BOUNDARY); //$NON-NLS-1$
             httpPost.setRequestProperty("User-Agent", agentName == null ? "Weasis STOWRS" : agentName);
@@ -245,6 +246,7 @@ public class StowRS implements AutoCloseable {
         DicomOutputStream dos = new DicomOutputStream(out, tsuid);
         dos.writeDataset(fmi, metadata);
         dos.flush();
+//        out.flush();
     }
 
     public void uploadEncapsulatedDocument(Attributes metadata, File bulkDataFile, String mimeType, String sopClassUID)

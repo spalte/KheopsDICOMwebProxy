@@ -36,7 +36,7 @@ public final class STOWResource {
     @POST
     @Path("/studies")
     @Consumes("multipart/related")
-    @Produces("application/dicom+json")
+    @Produces({"application/dicom+json; qs=0.9, application/dicom+xml; qs=1"})
     public Attributes stow(InputStream inputStream, @HeaderParam("Authorization") String AuthorizationHeader) {
         final String token;
         if (AuthorizationHeader != null) {
@@ -74,7 +74,7 @@ public final class STOWResource {
     @POST
     @Path("/capability/{capability}/studies")
     @Consumes("multipart/related")
-    @Produces("application/dicom+json")
+    @Produces({"application/dicom+json; qs=0.9, application/dicom+xml; qs=1"})
     public Attributes stowWithCapability(InputStream inputStream, @PathParam("capability") String capabilityToken) {
         return store(inputStream, capabilityToken);
     }

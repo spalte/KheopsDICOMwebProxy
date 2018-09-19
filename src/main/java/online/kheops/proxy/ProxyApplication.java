@@ -2,7 +2,6 @@ package online.kheops.proxy;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,7 +16,9 @@ public class ProxyApplication extends Application {
 
     public Set<Object> getSingletons() {
         Set<Object> set = new HashSet<>();
-        set.add(new AttributesWriter());
+        set.add(new JSONAttributesWriter());
+        set.add(new XMLAttributesWriter());
+        set.add(new CORSFilter());
         return set;
     }
 }
