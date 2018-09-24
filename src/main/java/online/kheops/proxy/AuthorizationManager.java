@@ -13,15 +13,14 @@ import java.util.Set;
 public final class AuthorizationManager {
     private final Set<SeriesID> authorizedSeriesIDs = new HashSet<>();
     private final Set<ContentLocation> authorizedContentLocations = new HashSet<>();
-    private final URI authorizationUri;
     private final String bearerToken;
+    private final AccessToken.AccessTokenBuilder accessTokenBuilder;
 
-    public AuthorizationManager(URI authorizationUri, String bearerToken) {
-        this.authorizationUri = authorizationUri;
+    public AuthorizationManager(AccessToken.AccessTokenBuilder accessTokenBuilder, String bearerToken) {
+        this.accessTokenBuilder = accessTokenBuilder;
         this.bearerToken = bearerToken;
     }
 
-    // Returns true if acquiring the authorization was successful
     // This method blocks while a connection is made to the authorization server
     // Throws an exception that describes the reason the authorization could not be acquired.
     // stores authorizations that have failed so that attributes can be patched
@@ -42,6 +41,7 @@ public final class AuthorizationManager {
     }
 
     private void getAuthorization(SeriesID seriesID) throws AuthorizationManagerException{
+        
 
     }
 

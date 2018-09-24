@@ -85,7 +85,7 @@ public final class STOWResource {
 
         try (StowRS stowRS = new StowRS(STOWServiceURI.toString() + "/studies", getStowContentType(), null, "Bearer " + getPostBearerToken())) {
             STOWService stowService = new STOWService(stowRS);
-            return new STOWProxy(contentType, inputStream, stowService, new AuthorizationManager(authorizationURI, bearerToken)).getResponse();
+            return new STOWProxy(contentType, inputStream, stowService, new AuthorizationManager(AccessToken.createBuilder(authorizationURI), bearerToken)).getResponse();
         } catch (STOWGatewayException e) {
             LOG.log(Level.SEVERE, "Gateway Error", e);
             throw new WebApplicationException(Response.Status.BAD_GATEWAY);
