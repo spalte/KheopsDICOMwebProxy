@@ -24,10 +24,19 @@ public final class AuthorizationManager {
     private final Set<ContentLocation> authorizedContentLocations = new HashSet<>();
     private final UriBuilder authorizationUriBuilder;
     private final String bearerToken;
+    private final String albumId;
 
-    public AuthorizationManager(URI authorizationServerRoot, String bearerToken) {
-        authorizationUriBuilder = UriBuilder.fromUri(Objects.requireNonNull(authorizationServerRoot)).path("studies/{StudyInstanceUID}/series/{SeriesInstanceUID}");
+    public AuthorizationManager(URI authorizationServerRoot, String bearerToken, String albumId, String studyInstanceUID) {
         this.bearerToken = Objects.requireNonNull(bearerToken);
+        this.albumId = albumId;
+        UriBuilder uriBuilder = UriBuilder.fromUri(Objects.requireNonNull(authorizationServerRoot)).path("studies");
+        if (studyInstanceUID != null) {
+            uriBuilder = uriBuilder.path(studyInstanceUID);
+        }
+        if (albumId != null) {
+            uriBuilder = uriBuilder.queryParam("album", albumId);
+        }
+        authorizationUriBuilder = uriBuilder.path("{StudyInstanceUID}/series/{SeriesInstanceUID}");
     }
 
     // This method blocks while a connection is made to the authorization server
