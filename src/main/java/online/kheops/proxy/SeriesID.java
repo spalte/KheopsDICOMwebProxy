@@ -24,4 +24,16 @@ public class SeriesID extends MultiPart {
     public String getSeriesUID() {
         return seriesUID;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof SeriesID &&
+                studyUID.equals(((SeriesID) o).getStudyUID()) &&
+                seriesUID.equals(((SeriesID) o).getSeriesUID());
+    }
+
+    @Override
+    public int hashCode() {
+        return studyUID.hashCode() | seriesUID.hashCode();
+    }
 }
