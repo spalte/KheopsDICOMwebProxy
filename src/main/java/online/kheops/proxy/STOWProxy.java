@@ -1,11 +1,11 @@
 package online.kheops.proxy;
 
 import online.kheops.proxy.part.Part;
-import org.dcm4che3.data.Attributes;
 import org.dcm4che3.mime.MultipartInputStream;
 import org.dcm4che3.mime.MultipartParser;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;
@@ -33,11 +33,11 @@ public final class STOWProxy {
         boundary = boundary();
     }
 
-    public Attributes getResponse() throws STOWGatewayException, STOWRequestException {
+    public Response getResponse() throws STOWGatewayException, STOWRequestException {
         processMultipart();
 
         try {
-            return authorizationManager.patchAttributes(stowService.getResponse());
+            return authorizationManager.getResponse(stowService.getResponse());
         } catch (IOException e ) {
             throw new STOWGatewayException("Error getting a response", e);
         }
@@ -57,7 +57,9 @@ public final class STOWProxy {
     private void processPart(int partNumber, MultipartInputStream multipartInputStream)
             throws STOWRequestException, STOWGatewayException {
 
+        String partString = "Unknown part";
         try (Part part = Part.getInstance(multipartInputStream)) {
+            partString = part.toString();
             authorizationManager.getAuthorization(part);
             writePart(partNumber, part);
         } catch (STOWGatewayException e) {
@@ -65,7 +67,8 @@ public final class STOWProxy {
         } catch (IOException e) {
             throw new STOWRequestException("Unable to parse for part:\n" + partNumber);
         } catch (AuthorizationManagerException e) {
-            LOG.log(Level.WARNING, "Unable to get authorization for part:\n" + partNumber, e);
+            LOG.log(Level.WARNING, "Unable to get authorization for part:" + partNumber + ", " + partString);
+            LOG.log(Level.FINE, "Authorization failure exception:\n" , e);
         }
     }
 

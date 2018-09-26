@@ -2,6 +2,7 @@ package online.kheops.proxy;
 
 public class AuthorizationManagerException extends Exception {
     public static enum Reason {
+        MISSING_ATTRIBUTE,
         SERIES_ACCESS_FORBIDDEN,
         UNKNOWN_CONTENT_LOCATION
     }

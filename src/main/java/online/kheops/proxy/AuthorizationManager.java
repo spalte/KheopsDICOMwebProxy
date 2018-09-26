@@ -1,7 +1,12 @@
 package online.kheops.proxy;
 
+import online.kheops.proxy.part.MissingAttributeException;
 import online.kheops.proxy.part.Part;
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Sequence;
+import org.dcm4che3.data.Tag;
+import org.dcm4che3.data.VR;
+import org.dcm4che3.net.Status;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -21,6 +26,7 @@ public final class AuthorizationManager {
 
     private final Set<SeriesID> authorizedSeriesIDs = new HashSet<>();
     private final Set<SeriesID> forbiddenSeriesIDs = new HashSet<>();
+    private final Set<InstanceID> forbiddenInstanceIDs = new HashSet<>();
     private final Set<ContentLocation> authorizedContentLocations = new HashSet<>();
     private final UriBuilder authorizationUriBuilder;
     private final String bearerToken;
@@ -43,8 +49,12 @@ public final class AuthorizationManager {
     // Throws an exception that describes the reason the authorization could not be acquired.
     // stores authorizations that have failed so that attributes can be patched
     public void getAuthorization(Part part) throws AuthorizationManagerException, STOWGatewayException {
-        if (part.getSeriesID().isPresent()) {
-            getAuthorization(part.getSeriesID().get());
+        try {
+            if (part.getInstanceID().isPresent()) {
+                getAuthorization(part.getInstanceID().get());
+            }
+        } catch (MissingAttributeException e) {
+            throw new AuthorizationManagerException("Unable to get instance", AuthorizationManagerException.Reason.MISSING_ATTRIBUTE, e);
         }
         if (part.getContentLocation().isPresent()) {
             getAuthorization(part.getContentLocation().get());
@@ -53,14 +63,38 @@ public final class AuthorizationManager {
         authorizeContentLocations(part.getBulkDataLocations());
     }
 
-    public Attributes patchAttributes(Attributes attributes) {
-        // TODO
-        return attributes;
+    public Response getResponse(Attributes attributes) {
+        boolean hasFailedSOPs = false;
+
+        // look at the attributes, and see if there were any failures
+        Sequence failedSOPs = attributes.getSequence(Tag.FailedSOPSequence);
+        if (failedSOPs != null) {
+            hasFailedSOPs = true;
+        } else if (!forbiddenInstanceIDs.isEmpty()) {
+            failedSOPs = attributes.newSequence(Tag.FailedSOPSequence, forbiddenInstanceIDs.size());
+            hasFailedSOPs = true;
+        }
+
+        for (InstanceID forbiddenInstance: forbiddenInstanceIDs) {
+            Attributes failedAttributes = new Attributes(3);
+            failedAttributes.setString(Tag.ReferencedSOPInstanceUID, VR.UI, forbiddenInstance.getSOPInstanceUID());
+            failedAttributes.setString(Tag.ReferencedSOPClassUID, VR.UI, forbiddenInstance.getSOPClassUID());
+            failedAttributes.setInt(Tag.FailureReason, VR.US, Status.NotAuthorized);
+
+            failedSOPs.add(failedAttributes);
+        }
+
+        return Response.status(hasFailedSOPs ? Response.Status.OK : Response.Status.ACCEPTED).entity(attributes).build();
     }
 
-    private void getAuthorization(SeriesID seriesID) throws AuthorizationManagerException, STOWGatewayException {
+    private void getAuthorization(InstanceID instanceID) throws AuthorizationManagerException, STOWGatewayException {
+        final SeriesID seriesID = instanceID.getSeriesID();
         if (authorizedSeriesIDs.contains(seriesID)) {
             return;
+        }
+        if (forbiddenSeriesIDs.contains(seriesID)) {
+            forbiddenInstanceIDs.add(instanceID);
+            throw new AuthorizationManagerException("Series access forbidden", AuthorizationManagerException.Reason.SERIES_ACCESS_FORBIDDEN);
         }
 
         URI uri = authorizationUriBuilder.build(seriesID.getStudyUID(), seriesID.getSeriesUID());
@@ -73,15 +107,19 @@ public final class AuthorizationManager {
                     .put(Entity.text(""));
         } catch (ProcessingException e) {
             forbiddenSeriesIDs.add(seriesID);
+            forbiddenInstanceIDs.add(instanceID);
             throw new STOWGatewayException("Error while getting the access token", e);
         }  catch (WebApplicationException e) {
             forbiddenSeriesIDs.add(seriesID);
+            forbiddenInstanceIDs.add(instanceID);
             throw new AuthorizationManagerException("Series access forbidden", AuthorizationManagerException.Reason.SERIES_ACCESS_FORBIDDEN, e);
         }
 
         if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
             authorizedSeriesIDs.add(seriesID);
         } else {
+            forbiddenSeriesIDs.add(seriesID);
+            forbiddenInstanceIDs.add(instanceID);
             throw new AuthorizationManagerException("Series access forbidden", AuthorizationManagerException.Reason.SERIES_ACCESS_FORBIDDEN);
         }
     }

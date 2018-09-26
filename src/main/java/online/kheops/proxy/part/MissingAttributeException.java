@@ -1,7 +1,7 @@
-package online.kheops.proxy;
+package online.kheops.proxy.part;
 
 public class MissingAttributeException extends Exception {
-    public MissingAttributeException(String message, Throwable cause) {
+    MissingAttributeException(String message, Throwable cause) {
         super(message, cause);
     }
 }

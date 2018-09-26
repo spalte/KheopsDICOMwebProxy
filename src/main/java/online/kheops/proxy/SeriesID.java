@@ -4,7 +4,7 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.glassfish.jersey.media.multipart.MultiPart;
 
-public class SeriesID extends MultiPart {
+public final class SeriesID extends MultiPart {
     private final String studyUID;
     private final String seriesUID;
 
@@ -13,8 +13,17 @@ public class SeriesID extends MultiPart {
         this.seriesUID = seriesUID;
     }
 
-    public static SeriesID from(Attributes attributes) {
-        return new SeriesID(attributes.getString(Tag.StudyInstanceUID), attributes.getString(Tag.SeriesInstanceUID));
+    public static SeriesID from(Attributes attributes) throws IllegalArgumentException {
+        final String studyUID = attributes.getString(Tag.StudyInstanceUID);
+        if (studyUID == null) {
+            throw new IllegalArgumentException("Missing StudyInstanceUID");
+        }
+        final String seriesUID = attributes.getString(Tag.SeriesInstanceUID);
+        if (seriesUID == null) {
+            throw new IllegalArgumentException("Missing SeriesInstanceUID");
+        }
+
+        return new SeriesID(studyUID, seriesUID);
     }
 
     public String getStudyUID() {
@@ -36,4 +45,10 @@ public class SeriesID extends MultiPart {
     public int hashCode() {
         return studyUID.hashCode() | seriesUID.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "StudyInstanceUID:" + studyUID + " SeriesInstanceUID:" + seriesUID;
+    }
+
 }

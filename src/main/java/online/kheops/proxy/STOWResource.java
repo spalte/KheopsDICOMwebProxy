@@ -38,7 +38,7 @@ public final class STOWResource {
     @Path("/studies")
     @Consumes("multipart/related")
     @Produces({"application/dicom+json; qs=0.9, application/dicom+xml; qs=1"})
-    public Attributes stow(InputStream inputStream, @HeaderParam("Authorization") String authorizationHeader, @QueryParam("album") String albumId) {
+    public Response stow(InputStream inputStream, @HeaderParam("Authorization") String authorizationHeader, @QueryParam("album") String albumId) {
         return store(inputStream, authorizationHeaderToToken(authorizationHeader), albumId, null);
     }
 
@@ -46,7 +46,7 @@ public final class STOWResource {
     @Path("/capability/{capability}/studies")
     @Consumes("multipart/related")
     @Produces({"application/dicom+json; qs=0.9, application/dicom+xml; qs=1"})
-    public Attributes stowWithCapability(InputStream inputStream, @PathParam("capability") String capabilityToken, @QueryParam("album") String albumId) {
+    public Response stowWithCapability(InputStream inputStream, @PathParam("capability") String capabilityToken, @QueryParam("album") String albumId) {
         return store(inputStream, capabilityToken, albumId, null);
     }
 
@@ -54,7 +54,7 @@ public final class STOWResource {
     @Path("/studies/{studyInstanceUID}")
     @Consumes("multipart/related")
     @Produces({"application/dicom+json; qs=0.9, application/dicom+xml; qs=1"})
-    public Attributes stowStudy(InputStream inputStream, @HeaderParam("Authorization") String authorizationHeader, @PathParam("studyInstanceUID") String studyInstanceUID, @QueryParam("album") String albumId) {
+    public Response stowStudy(InputStream inputStream, @HeaderParam("Authorization") String authorizationHeader, @PathParam("studyInstanceUID") String studyInstanceUID, @QueryParam("album") String albumId) {
         return store(inputStream, authorizationHeaderToToken(authorizationHeader), albumId, studyInstanceUID);
     }
 
@@ -62,11 +62,11 @@ public final class STOWResource {
     @Path("/capability/{capability}/studies/{studyInstanceUID}")
     @Consumes("multipart/related")
     @Produces({"application/dicom+json; qs=0.9, application/dicom+xml; qs=1"})
-    public Attributes stowStudyWithCapability(InputStream inputStream, @PathParam("capability") String capabilityToken, @PathParam("studyInstanceUID") String studyInstanceUID, @QueryParam("album") String albumId) {
+    public Response stowStudyWithCapability(InputStream inputStream, @PathParam("capability") String capabilityToken, @PathParam("studyInstanceUID") String studyInstanceUID, @QueryParam("album") String albumId) {
         return store(inputStream, capabilityToken, albumId, studyInstanceUID);
     }
 
-    private Attributes store(InputStream inputStream, String bearerToken, String albumId, String studyInstanceUID) {
+    private Response store(InputStream inputStream, String bearerToken, String albumId, String studyInstanceUID) {
         final URI STOWServiceURI = getParameterURI("online.kheops.pacs.uri");
         final URI authorizationURI = getParameterURI("online.kheops.auth_server.uri");
 

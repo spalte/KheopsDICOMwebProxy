@@ -218,7 +218,7 @@ public class StowRS implements AutoCloseable {
         } else {
             LOGGER.info("response code: {}", httpPost.getResponseCode()); //$NON-NLS-1$
         }
-        return null;
+        throw new IOException("Failed");
     }
 
     public void uploadDicom(InputStream in, Attributes fmi, String tsuid) throws IOException {

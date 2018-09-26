@@ -1,6 +1,7 @@
 package online.kheops.proxy.part;
 
 import online.kheops.proxy.ContentLocation;
+import online.kheops.proxy.InstanceID;
 import online.kheops.proxy.SeriesID;
 import org.dcm4che3.mime.MultipartInputStream;
 import org.dcm4che3.ws.rs.MediaTypes;
@@ -39,7 +40,11 @@ public abstract class Part implements AutoCloseable {
         return Optional.empty();
     }
 
-    public Optional<SeriesID> getSeriesID() {
+    public Optional<SeriesID> getSeriesID() throws MissingAttributeException {
+        return Optional.empty();
+    }
+
+    public Optional<InstanceID> getInstanceID() throws MissingAttributeException {
         return Optional.empty();
     }
 
@@ -53,4 +58,19 @@ public abstract class Part implements AutoCloseable {
     }
 
     public void close() throws IOException {}
+
+    @Override
+    public String toString() {
+        final InstanceID instanceID;
+        try {
+            instanceID = getInstanceID().orElse(null);
+        } catch (MissingAttributeException e) {
+            return "Part with missing attribute";
+        }
+        if (instanceID == null) {
+            return "Part with unknown Instance ID";
+        } else {
+            return "Part: " + instanceID;
+        }
+    }
 }

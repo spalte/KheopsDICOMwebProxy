@@ -1,6 +1,7 @@
 package online.kheops.proxy.part;
 
 import online.kheops.proxy.ContentLocation;
+import online.kheops.proxy.InstanceID;
 import online.kheops.proxy.SeriesID;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.BulkData;
@@ -59,8 +60,20 @@ public class DICOMMetadataPart extends Part {
         this.bulkDataLocations = Collections.emptySet();
     }
 
-    public Optional<SeriesID> getSeriesID() {
-        return Optional.of(SeriesID.from(dataset));
+    public Optional<SeriesID> getSeriesID() throws MissingAttributeException {
+        try {
+            return Optional.of(SeriesID.from(dataset));
+        } catch (IllegalArgumentException e) {
+            throw new MissingAttributeException("Missing attribute", e);
+        }
+    }
+
+    public Optional<InstanceID> getInstanceID() throws MissingAttributeException {
+        try {
+            return Optional.of(InstanceID.from(dataset));
+        } catch (IllegalArgumentException e) {
+            throw new MissingAttributeException("Missing attribute", e);
+        }
     }
 
     public String getTransferSyntax() {
