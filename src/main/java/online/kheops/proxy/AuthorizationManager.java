@@ -88,7 +88,7 @@ public final class AuthorizationManager {
             failedSOPs.add(failedAttributes);
         }
 
-        return Response.status(hasFailedSOPs ? Response.Status.OK : Response.Status.ACCEPTED).entity(attributes).build();
+        return Response.status(hasFailedSOPs ? Response.Status.ACCEPTED : Response.Status.OK).entity(attributes).build();
     }
 
     private void getAuthorization(InstanceID instanceID) throws AuthorizationManagerException, STOWGatewayException {
