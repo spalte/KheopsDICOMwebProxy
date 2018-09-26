@@ -64,6 +64,10 @@ public final class AuthorizationManager {
     }
 
     public Response getResponse(Attributes attributes) {
+        if (attributes == null) {
+            return Response.status(Response.Status.CONFLICT).build();
+        }
+
         boolean hasFailedSOPs = false;
 
         // look at the attributes, and see if there were any failures

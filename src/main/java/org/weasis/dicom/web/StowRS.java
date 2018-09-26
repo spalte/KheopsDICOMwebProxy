@@ -215,10 +215,12 @@ public class StowRS implements AutoCloseable {
                 httpPost.getResponseCode() == HttpURLConnection.HTTP_OK) { // Failed or Warning
             // See http://dicom.nema.org/medical/dicom/current/output/chtml/part18/sect_6.6.html#table_6.6.1-1
             return httpPost.getInputStream();
+        } else if (httpPost.getResponseCode() == HttpURLConnection.HTTP_CONFLICT) {
+            return null;
         } else {
             LOGGER.info("response code: {}", httpPost.getResponseCode()); //$NON-NLS-1$
+            throw new IOException("Failed");
         }
-        throw new IOException("Failed");
     }
 
     public void uploadDicom(InputStream in, Attributes fmi, String tsuid) throws IOException {

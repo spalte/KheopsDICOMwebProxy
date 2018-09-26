@@ -12,6 +12,7 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.io.InputStream;
 
 public final class STOWService {
     private final StowRS stowRS;
@@ -50,10 +51,15 @@ public final class STOWService {
 
 
     public Attributes getResponse() throws IOException {
-        try {
-            return SAXReader.parse(stowRS.writeEndMarkersGetInputStream());
-        } catch (ParserConfigurationException | SAXException e) {
-            throw new IOException("Error parsing response", e);
+        final InputStream inputStream = stowRS.writeEndMarkersGetInputStream();
+        if (inputStream == null) {
+            return null;
+        } else {
+            try {
+                return SAXReader.parse(inputStream);
+            } catch (ParserConfigurationException | SAXException e) {
+                throw new IOException("Error parsing response", e);
+            }
         }
     }
 
