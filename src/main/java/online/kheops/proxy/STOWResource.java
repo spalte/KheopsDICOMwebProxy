@@ -20,7 +20,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.Date;
-import java.util.OptionalLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,7 +34,7 @@ public final class STOWResource {
     MediaType contentType;
 
     @POST
-    @Path("/studies")
+    @Path("/capabilities/password/dicomweb/studies")
     @Consumes("multipart/related")
     @Produces({"application/dicom+json; qs=0.9, application/dicom+xml; qs=1"})
     public Response stow(InputStream inputStream, @HeaderParam("Authorization") String authorizationHeader, @QueryParam("album") String albumId) {
@@ -43,7 +42,7 @@ public final class STOWResource {
     }
 
     @POST
-    @Path("/capability/{capability}/studies")
+    @Path("/{capability}/dicomweb/studies")
     @Consumes("multipart/related")
     @Produces({"application/dicom+json; qs=0.9, application/dicom+xml; qs=1"})
     public Response stowWithCapability(InputStream inputStream, @PathParam("capability") String capabilityToken, @QueryParam("album") String albumId) {
@@ -51,7 +50,7 @@ public final class STOWResource {
     }
 
     @POST
-    @Path("/studies/{studyInstanceUID}")
+    @Path("/capabilities/password/dicomweb/studies/{studyInstanceUID}")
     @Consumes("multipart/related")
     @Produces({"application/dicom+json; qs=0.9, application/dicom+xml; qs=1"})
     public Response stowStudy(InputStream inputStream, @HeaderParam("Authorization") String authorizationHeader, @PathParam("studyInstanceUID") String studyInstanceUID, @QueryParam("album") String albumId) {
@@ -59,7 +58,7 @@ public final class STOWResource {
     }
 
     @POST
-    @Path("/capability/{capability}/studies/{studyInstanceUID}")
+    @Path("/{capability}/dicomweb/studies/{studyInstanceUID}")
     @Consumes("multipart/related")
     @Produces({"application/dicom+json; qs=0.9, application/dicom+xml; qs=1"})
     public Response stowStudyWithCapability(InputStream inputStream, @PathParam("capability") String capabilityToken, @PathParam("studyInstanceUID") String studyInstanceUID, @QueryParam("album") String albumId) {
