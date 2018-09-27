@@ -34,7 +34,7 @@ public final class STOWResource {
     MediaType contentType;
 
     @POST
-    @Path("/capabilities/password/dicomweb/studies")
+    @Path("/password/dicomweb/studies")
     @Consumes("multipart/related")
     @Produces({"application/dicom+json; qs=0.9, application/dicom+xml; qs=1"})
     public Response stow(InputStream inputStream, @HeaderParam("Authorization") String authorizationHeader, @QueryParam("album") String albumId) {
@@ -42,7 +42,7 @@ public final class STOWResource {
     }
 
     @POST
-    @Path("/{capability}/dicomweb/studies")
+    @Path("/{capability:[a-zA-Z0-9]{22}}/dicomweb/studies")
     @Consumes("multipart/related")
     @Produces({"application/dicom+json; qs=0.9, application/dicom+xml; qs=1"})
     public Response stowWithCapability(InputStream inputStream, @PathParam("capability") String capabilityToken, @QueryParam("album") String albumId) {
@@ -50,7 +50,7 @@ public final class STOWResource {
     }
 
     @POST
-    @Path("/capabilities/password/dicomweb/studies/{studyInstanceUID}")
+    @Path("/password/dicomweb/studies/{studyInstanceUID}")
     @Consumes("multipart/related")
     @Produces({"application/dicom+json; qs=0.9, application/dicom+xml; qs=1"})
     public Response stowStudy(InputStream inputStream, @HeaderParam("Authorization") String authorizationHeader, @PathParam("studyInstanceUID") String studyInstanceUID, @QueryParam("album") String albumId) {
@@ -58,7 +58,7 @@ public final class STOWResource {
     }
 
     @POST
-    @Path("/{capability}/dicomweb/studies/{studyInstanceUID}")
+    @Path("/{capability:[a-zA-Z0-9]{22}}/dicomweb/studies/{studyInstanceUID}")
     @Consumes("multipart/related")
     @Produces({"application/dicom+json; qs=0.9, application/dicom+xml; qs=1"})
     public Response stowStudyWithCapability(InputStream inputStream, @PathParam("capability") String capabilityToken, @PathParam("studyInstanceUID") String studyInstanceUID, @QueryParam("album") String albumId) {
