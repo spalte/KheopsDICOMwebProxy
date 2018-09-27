@@ -20,8 +20,12 @@ import java.net.URI;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public final class AuthorizationManager {
+    private static final Logger LOG = Logger.getLogger(STOWResource.class.getName());
     private static final Client CLIENT = ClientBuilder.newClient();
 
     private final Set<SeriesID> authorizedSeriesIDs = new HashSet<>();
@@ -29,20 +33,20 @@ public final class AuthorizationManager {
     private final Set<InstanceID> forbiddenInstanceIDs = new HashSet<>();
     private final Set<ContentLocation> authorizedContentLocations = new HashSet<>();
     private final UriBuilder authorizationUriBuilder;
+    private final UriBuilder fetchUriBuilder;
     private final String bearerToken;
-    private final String albumId;
 
     public AuthorizationManager(URI authorizationServerRoot, String bearerToken, String albumId, String studyInstanceUID) {
         this.bearerToken = Objects.requireNonNull(bearerToken);
-        this.albumId = albumId;
-        UriBuilder uriBuilder = UriBuilder.fromUri(Objects.requireNonNull(authorizationServerRoot)).path("studies");
+        authorizationUriBuilder = UriBuilder.fromUri(Objects.requireNonNull(authorizationServerRoot)).path("studies");
         if (studyInstanceUID != null) {
-            uriBuilder = uriBuilder.path(studyInstanceUID);
+            authorizationUriBuilder.path(studyInstanceUID);
         }
         if (albumId != null) {
-            uriBuilder = uriBuilder.queryParam("album", albumId);
+            authorizationUriBuilder.queryParam("album", albumId);
         }
-        authorizationUriBuilder = uriBuilder.path("{StudyInstanceUID}/series/{SeriesInstanceUID}");
+        authorizationUriBuilder.path("{StudyInstanceUID}/series/{SeriesInstanceUID}");
+        fetchUriBuilder = UriBuilder.fromUri(Objects.requireNonNull(authorizationServerRoot)).path("studies/{StudyInstanceUID}/fetch");
     }
 
     // This method blocks while a connection is made to the authorization server
@@ -87,6 +91,11 @@ public final class AuthorizationManager {
 
             failedSOPs.add(failedAttributes);
         }
+
+        authorizedSeriesIDs.stream()
+                .map(SeriesID::getStudyUID)
+                .collect(Collectors.toSet())
+                .forEach(this::triggerFetch);
 
         return Response.status(hasFailedSOPs ? Response.Status.ACCEPTED : Response.Status.OK).entity(attributes).build();
     }
@@ -138,4 +147,16 @@ public final class AuthorizationManager {
         authorizedContentLocations.addAll(contentLocations);
     }
 
+    private void triggerFetch(String studyInstanceUID) {
+        URI uri = fetchUriBuilder.build(studyInstanceUID);
+
+        try {
+            CLIENT.target(uri)
+                    .request()
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + bearerToken)
+                    .post(Entity.text(""));
+        } catch (ProcessingException | WebApplicationException e) {
+            LOG.log(Level.SEVERE, "Error while triggering fetch for studyInstanceUID:" + studyInstanceUID, e);
+        }
+    }
 }
