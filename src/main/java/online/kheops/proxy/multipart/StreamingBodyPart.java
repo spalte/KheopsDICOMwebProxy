@@ -4,7 +4,6 @@ import org.glassfish.jersey.media.multipart.ContentDisposition;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import java.util.Objects;
 
 public class StreamingBodyPart {
     private Object entity;

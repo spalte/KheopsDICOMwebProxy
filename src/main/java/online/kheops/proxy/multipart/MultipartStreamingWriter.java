@@ -1,7 +1,5 @@
 package online.kheops.proxy.multipart;
 
-import online.kheops.proxy.multipart.MultipartOutputStream;
-import online.kheops.proxy.multipart.StreamingMultiPart;
 import org.glassfish.jersey.media.multipart.Boundary;
 import org.glassfish.jersey.message.MessageUtils;
 
@@ -20,7 +18,7 @@ import java.lang.reflect.Type;
 
 @Provider
 @Produces("multipart/*")
-public class MultipartStreamingWriter implements MessageBodyWriter<StreamingMultiPart> {
+public class MultipartStreamingWriter implements MessageBodyWriter<MultipartStreamingOutput> {
 
     private final Providers providers;
 
@@ -29,7 +27,7 @@ public class MultipartStreamingWriter implements MessageBodyWriter<StreamingMult
     }
 
     @Override
-    public long getSize(final StreamingMultiPart streamingMultiPart,
+    public long getSize(final MultipartStreamingOutput multipartStreamingOutput,
                         final Class<?> type,
                         final Type genericType,
                         final Annotation[] annotations,
@@ -42,11 +40,11 @@ public class MultipartStreamingWriter implements MessageBodyWriter<StreamingMult
                                final Type genericType,
                                final Annotation[] annotations,
                                final MediaType mediaType) {
-        return StreamingMultiPart.class.isAssignableFrom(type);
+        return MultipartStreamingOutput.class.isAssignableFrom(type);
     }
 
     @Override
-    public void writeTo(final StreamingMultiPart streamingMultiPart,
+    public void writeTo(final MultipartStreamingOutput multipartStreamingOutput,
                         final Class<?> type,
                         final Type genericType,
                         final Annotation[] annotations,
@@ -71,7 +69,7 @@ public class MultipartStreamingWriter implements MessageBodyWriter<StreamingMult
 
         // Build the MultiPartOutputStream
         final MultipartOutputStream multipartOutputStream = new MultipartOutputStream(stream, boundaryMediaType, providers);
-        streamingMultiPart.getMultipartStreamingOutput().write(multipartOutputStream);
+        multipartStreamingOutput.write(multipartOutputStream);
 
         // Write the final boundary string
         final Writer writer = new BufferedWriter(new OutputStreamWriter(stream, MessageUtils.getCharset(mediaType)));
