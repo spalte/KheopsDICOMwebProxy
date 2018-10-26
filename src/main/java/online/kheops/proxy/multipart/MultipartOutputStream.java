@@ -1,9 +1,9 @@
 package online.kheops.proxy.multipart;
 
-import org.glassfish.jersey.media.multipart.BodyPartEntity;
 import org.glassfish.jersey.media.multipart.internal.LocalizationMessages;
 import org.glassfish.jersey.message.MessageUtils;
 
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
@@ -30,16 +30,12 @@ public class MultipartOutputStream extends FilterOutputStream {
 
     }
 
-    public void write(StreamingBodyPart bodyPart) throws IOException {
-        // Write the leading boundary string
-        if (!firstPartWritten) {
-            firstPartWritten = true;
-            writer.write("--");
-        } else {
-            writer.write("\r\n--");
-        }
-        writer.write(getBoundary());
-        writer.write("\r\n");
+    public void writePart(Entity inputStream) {
+
+    }
+
+    public void writePart(StreamingBodyPart bodyPart) throws IOException {
+        writeLeadingBoundary();
 
         // Write the headers for this body part
         final MediaType bodyMediaType = bodyPart.getMediaType();
@@ -54,22 +50,7 @@ public class MultipartOutputStream extends FilterOutputStream {
             bodyHeaders.putSingle("Content-Disposition", bodyPart.getContentDisposition().toString());
         }
 
-        for (final Map.Entry<String, List<String>> entry : bodyHeaders.entrySet()) {
-            // Write this header and its value(s)
-            writer.write(entry.getKey());
-            writer.write(':');
-            boolean first = true;
-            for (final String value : entry.getValue()) {
-                if (first) {
-                    writer.write(' ');
-                    first = false;
-                } else {
-                    writer.write(',');
-                }
-                writer.write(value);
-            }
-            writer.write("\r\n");
-        }
+        writeHeaders(bodyHeaders);
 
         // Mark the end of the headers for this body part
         writer.write("\r\n");
@@ -108,5 +89,35 @@ public class MultipartOutputStream extends FilterOutputStream {
 
     private String getBoundary() {
         return mediaType.getParameters().get("boundary");
+    }
+
+    private void writeLeadingBoundary() throws IOException {
+        if (!firstPartWritten) {
+            firstPartWritten = true;
+            writer.write("--");
+        } else {
+            writer.write("\r\n--");
+        }
+        writer.write(getBoundary());
+        writer.write("\r\n");
+    }
+
+    private void writeHeaders(final MultivaluedMap<String, String> headers) throws IOException {
+        for (final Map.Entry<String, List<String>> entry : headers.entrySet()) {
+            // Write this header and its value(s)
+            writer.write(entry.getKey());
+            writer.write(':');
+            boolean first = true;
+            for (final String value : entry.getValue()) {
+                if (first) {
+                    writer.write(' ');
+                    first = false;
+                } else {
+                    writer.write(',');
+                }
+                writer.write(value);
+            }
+            writer.write("\r\n");
+        }
     }
 }

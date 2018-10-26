@@ -1,24 +1,24 @@
 package online.kheops.proxy.stow;
 
 
+import online.kheops.proxy.multipart.MultipartOutputStream;
+import online.kheops.proxy.multipart.StreamingBodyPart;
 import online.kheops.proxy.part.BulkDataPart;
 import online.kheops.proxy.part.DICOMMetadataPart;
 import online.kheops.proxy.part.DICOMPart;
 import online.kheops.proxy.part.Part;
-import org.dcm4che3.data.Attributes;
-import org.dcm4che3.io.SAXReader;
-import org.weasis.dicom.web.StowRS;
-import org.xml.sax.SAXException;
+import org.dcm4che3.ws.rs.MediaTypes;
 
-import javax.xml.parsers.ParserConfigurationException;
+import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStream;
 
 public final class Service {
-    private final StowRS stowRS;
 
-    Service(StowRS stowRS) {
-        this.stowRS = stowRS;
+    private final MultipartOutputStream multipartOutputStream;
+
+    Service(MultipartOutputStream multipartOutputStream) {
+        this.multipartOutputStream = multipartOutputStream;
+
     }
 
     public void write(Part part) throws GatewayException {
@@ -43,24 +43,9 @@ public final class Service {
 
     public void writeDICOM(DICOMPart dicomPart) throws GatewayException {
         try {
-            stowRS.uploadDicom(dicomPart.getDataset(), dicomPart.getTransferSyntax());
+            multipartOutputStream.write(new StreamingBodyPart(dicomPart.getDataset(), MediaTypes.APPLICATION_DICOM_TYPE));
         } catch (IOException e) {
             throw new GatewayException("Failed to store DICOMPart", e);
         }
     }
-
-
-    public Attributes getResponse() throws IOException {
-        final InputStream inputStream = stowRS.writeEndMarkersGetInputStream();
-        if (inputStream == null) {
-            return null;
-        } else {
-            try {
-                return SAXReader.parse(inputStream);
-            } catch (ParserConfigurationException | SAXException e) {
-                throw new IOException("Error parsing response", e);
-            }
-        }
-    }
-
 }

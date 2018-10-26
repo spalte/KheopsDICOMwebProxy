@@ -3,14 +3,23 @@ package online.kheops.proxy.stow;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
+import online.kheops.proxy.multipart.MultipartStreamingOutput;
 import online.kheops.proxy.tokens.AccessToken;
 import online.kheops.proxy.tokens.AccessTokenException;
 import online.kheops.proxy.tokens.AuthorizationToken;
+import org.dcm4che3.io.SAXReader;
+import org.dcm4che3.ws.rs.MediaTypes;
 import org.weasis.dicom.web.StowRS;
+import org.xml.sax.SAXException;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.*;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.*;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -24,6 +33,7 @@ import java.util.logging.Logger;
 @Path("/")
 public final class Resource {
     private static final Logger LOG = Logger.getLogger(Resource.class.getName());
+    private static final Client CLIENT = ClientBuilder.newClient();
 
     @Context
     ServletContext context;
@@ -81,29 +91,36 @@ public final class Resource {
             stowServiceURI = UriBuilder.fromUri(stowServiceURI).path("/studies").build();
         }
 
-        try (StowRS stowRS = new StowRS(stowServiceURI.toString(), getStowContentType(), null, "Bearer " + getPostBearerToken())) {
-            Service stowService = new Service(stowRS);
-            return new Proxy(contentType, inputStream, stowService, new AuthorizationManager(authorizationURI, authorizationToken, albumId, studyInstanceUID)).getResponse();
-        } catch (GatewayException e) {
-            LOG.log(Level.SEVERE, "Gateway Error", e);
-            throw new WebApplicationException(Response.Status.BAD_GATEWAY);
-        } catch (RequestException e) {
-            LOG.log(Level.WARNING, "Bad request Error", e);
-            throw new WebApplicationException(Response.Status.BAD_REQUEST);
-        } catch (WebApplicationException e) {
-            throw e;
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Error in the proxy", e);
-            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
-        }
-    }
+        AuthorizationManager authorizationManager = new AuthorizationManager(authorizationURI, authorizationToken, albumId, studyInstanceUID);
 
-    private StowRS.ContentType getStowContentType() {
+        MultipartStreamingOutput multipartStreamingOutput = output -> {
+            Service stowService = new Service(output);
+            try {
+                new Proxy(contentType, inputStream, stowService, authorizationManager);
+            } catch (GatewayException e) {
+                LOG.log(Level.SEVERE, "Gateway Error", e);
+                throw new WebApplicationException(Response.Status.BAD_GATEWAY);
+            } catch (RequestException e) {
+                LOG.log(Level.WARNING, "Bad request Error", e);
+                throw new WebApplicationException(Response.Status.BAD_REQUEST);
+            } catch (WebApplicationException e) {
+                throw e;
+            } catch (Exception e) {
+                LOG.log(Level.SEVERE, "Error in the proxy", e);
+                throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+            }
+        };
+
+        InputStream responseStream = CLIENT.target(stowServiceURI)
+                .request()
+                .header("Authorization", "Bearer " + getPostBearerToken())
+                .post(Entity.entity(multipartStreamingOutput, contentType), InputStream.class);
+
         try {
-            return StowRS.ContentType.from(contentType.getParameters().get("type"));
-        } catch (IllegalArgumentException e) {
-            LOG.log(Level.WARNING, "Bad request Error", e);
-            throw new WebApplicationException(Response.Status.BAD_REQUEST);
+            return authorizationManager.getResponse(SAXReader.parse(responseStream));
+        } catch (ParserConfigurationException | SAXException | IOException e) {
+            LOG.log(Level.WARNING, "Error parsing response", e);
+            throw new WebApplicationException(Response.Status.BAD_GATEWAY);
         }
     }
 

@@ -24,24 +24,17 @@ public final class Proxy {
 
 
     public Proxy(MediaType contentType, InputStream inputStream, Service stowService, AuthorizationManager authorizationManager)
-            throws RequestException {
+            throws GatewayException, RequestException {
         this.contentType = contentType;
         this.inputStream = inputStream;
         this.stowService = stowService;
         this.authorizationManager = authorizationManager;
 
         boundary = boundary();
-    }
 
-    public Response getResponse() throws GatewayException, RequestException {
         processMultipart();
-
-        try {
-            return authorizationManager.getResponse(stowService.getResponse());
-        } catch (IOException e ) {
-            throw new GatewayException("Error getting a response", e);
-        }
     }
+
 
     private void processMultipart() throws RequestException, GatewayException {
         MultipartParser multipartParser = new MultipartParser(boundary);
