@@ -30,6 +30,9 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static org.glassfish.jersey.client.ClientProperties.REQUEST_ENTITY_PROCESSING;
+import static org.glassfish.jersey.client.RequestEntityProcessing.CHUNKED;
+
 @Path("/")
 public final class Resource {
     private static final Logger LOG = Logger.getLogger(Resource.class.getName());
@@ -38,6 +41,7 @@ public final class Resource {
     private static Client newClient() {
         final Client client = ClientBuilder.newClient();
         client.register(MultipartStreamingWriter.class);
+        client.property(REQUEST_ENTITY_PROCESSING, CHUNKED);
         return client;
     }
 

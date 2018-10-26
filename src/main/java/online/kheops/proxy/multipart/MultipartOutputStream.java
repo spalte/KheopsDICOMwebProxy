@@ -3,7 +3,6 @@ package online.kheops.proxy.multipart;
 import org.glassfish.jersey.media.multipart.internal.LocalizationMessages;
 import org.glassfish.jersey.message.MessageUtils;
 
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
@@ -81,6 +80,7 @@ public class MultipartOutputStream extends FilterOutputStream {
                 bodyHeaders,
                 this
         );
+        flush();
     }
 
     private String getBoundary() {
