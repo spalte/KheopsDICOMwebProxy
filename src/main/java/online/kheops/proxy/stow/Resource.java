@@ -4,12 +4,12 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
 import online.kheops.proxy.multipart.MultipartStreamingOutput;
+import online.kheops.proxy.multipart.MultipartStreamingWriter;
 import online.kheops.proxy.tokens.AccessToken;
 import online.kheops.proxy.tokens.AccessTokenException;
 import online.kheops.proxy.tokens.AuthorizationToken;
 import org.dcm4che3.io.SAXReader;
 import org.dcm4che3.ws.rs.MediaTypes;
-import org.weasis.dicom.web.StowRS;
 import org.xml.sax.SAXException;
 
 import javax.servlet.ServletContext;
@@ -33,7 +33,13 @@ import java.util.logging.Logger;
 @Path("/")
 public final class Resource {
     private static final Logger LOG = Logger.getLogger(Resource.class.getName());
-    private static final Client CLIENT = ClientBuilder.newClient();
+    private static final Client CLIENT = newClient();
+
+    private static Client newClient() {
+        final Client client = ClientBuilder.newClient();
+        client.register(MultipartStreamingWriter.class);
+        return client;
+    }
 
     @Context
     ServletContext context;
@@ -111,12 +117,13 @@ public final class Resource {
             }
         };
 
-        InputStream responseStream = CLIENT.target(stowServiceURI)
-                .request()
-                .header("Authorization", "Bearer " + getPostBearerToken())
-                .post(Entity.entity(multipartStreamingOutput, contentType), InputStream.class);
-
         try {
+            InputStream responseStream = CLIENT.target(stowServiceURI)
+                    .request()
+                    .header("Authorization", "Bearer " + getPostBearerToken())
+                    .header("Accept", MediaTypes.APPLICATION_DICOM_XML)
+                    .post(Entity.entity(multipartStreamingOutput, contentType), InputStream.class);
+
             return authorizationManager.getResponse(SAXReader.parse(responseStream));
         } catch (ParserConfigurationException | SAXException | IOException e) {
             LOG.log(Level.WARNING, "Error parsing response", e);

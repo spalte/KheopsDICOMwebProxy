@@ -3,12 +3,13 @@ package online.kheops.proxy.multipart;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
 public class StreamingBodyPart {
     private Object entity;
     private MediaType mediaType;
-    private MultivaluedMap<String, String> headers;
+    private MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
     private ContentDisposition contentDisposition;
 
     public StreamingBodyPart(final Object entity, final MediaType mediaType) {

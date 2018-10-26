@@ -30,10 +30,6 @@ public class MultipartOutputStream extends FilterOutputStream {
 
     }
 
-    public void writePart(Entity inputStream) {
-
-    }
-
     public void writePart(StreamingBodyPart bodyPart) throws IOException {
         writeLeadingBoundary();
 

@@ -9,8 +9,10 @@ import online.kheops.proxy.part.DICOMPart;
 import online.kheops.proxy.part.Part;
 import org.dcm4che3.ws.rs.MediaTypes;
 
-import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
 
 public final class Service {
 
@@ -43,7 +45,9 @@ public final class Service {
 
     public void writeDICOM(DICOMPart dicomPart) throws GatewayException {
         try {
-            multipartOutputStream.write(new StreamingBodyPart(dicomPart.getDataset(), MediaTypes.APPLICATION_DICOM_TYPE));
+            final InputStream inputStream = Files.newInputStream(dicomPart.getCacheFilePath());
+            multipartOutputStream.writePart(new StreamingBodyPart(inputStream, MediaTypes.APPLICATION_DICOM_TYPE));
+            inputStream.close();
         } catch (IOException e) {
             throw new GatewayException("Failed to store DICOMPart", e);
         }

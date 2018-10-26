@@ -20,6 +20,11 @@ public class TeeInputStream extends FilterInputStream {
     @Override
     public int read() throws IOException {
         final int readInt = super.read();
+
+        if (readInt == -1) {
+            return readInt;
+        }
+
         if (bytesRewound == 0) {
             outputStream.write(readInt);
         } else {
@@ -38,6 +43,10 @@ public class TeeInputStream extends FilterInputStream {
         }
 
         final int readCount = super.read(b, off, len);
+        if (readCount == -1) {
+            return readCount;
+        }
+
         int bytesToWrite = readCount;
 
         if (bytesRewound > 0) {
