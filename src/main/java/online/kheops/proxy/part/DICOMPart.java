@@ -50,6 +50,7 @@ public class DICOMPart extends DICOMMetadataPart {
 
     private static ParsedData parseInputStream(InputStream inputStream) throws IOException{
         final DicomInputStream dicomInputStream = new DicomInputStream(inputStream);
+        dicomInputStream.setIncludeBulkData(DicomInputStream.IncludeBulkData.NO);
 
         return new ParsedData(dicomInputStream.readDataset(-1, -1),
                               dicomInputStream.getFileMetaInformation(),
