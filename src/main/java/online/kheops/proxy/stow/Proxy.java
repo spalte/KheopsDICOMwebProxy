@@ -22,7 +22,6 @@ public final class Proxy {
 
     private final InputStream inputStream;
     private final MediaType contentType;
-    private final String boundary;
 
     private final MultipartOutputStream multipartOutputStream;
     private final AuthorizationManager authorizationManager;
@@ -34,14 +33,11 @@ public final class Proxy {
         this.authorizationManager = authorizationManager;
         this.multipartOutputStream = multipartOutputStream;
 
-        boundary = boundary();
-
         processMultipart();
     }
 
-
     private void processMultipart() throws RequestException, GatewayException {
-        MultipartParser multipartParser = new MultipartParser(boundary);
+        final MultipartParser multipartParser = new MultipartParser(getBoundary());
         try {
             multipartParser.parse(inputStream, this::processPart);
         } catch (RequestException | GatewayException e) {
@@ -79,8 +75,8 @@ public final class Proxy {
         }
     }
 
-    private String boundary() throws RequestException {
-        String boundary = contentType.getParameters().get("boundary");
+    private String getBoundary() throws RequestException {
+        final String boundary = contentType.getParameters().get("boundary");
         if (boundary == null) {
             throw new RequestException("Missing Boundary Parameter");
         }
