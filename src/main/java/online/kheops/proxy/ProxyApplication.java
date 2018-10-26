@@ -4,7 +4,7 @@ import online.kheops.proxy.filter.CORSFilter;
 import online.kheops.proxy.marshaller.JSONAttributesWriter;
 import online.kheops.proxy.marshaller.XMLAttributesWriter;
 import online.kheops.proxy.multipart.MultipartStreamingWriter;
-import online.kheops.proxy.stow.Resource;
+import online.kheops.proxy.stow.resource.Resource;
 import online.kheops.proxy.wadors.WadoRsResource;
 import online.kheops.proxy.wadouri.WadoUriResource;
 

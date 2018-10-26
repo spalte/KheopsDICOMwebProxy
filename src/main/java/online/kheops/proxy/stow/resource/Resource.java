@@ -1,10 +1,13 @@
-package online.kheops.proxy.stow;
+package online.kheops.proxy.stow.resource;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
 import online.kheops.proxy.multipart.MultipartStreamingOutput;
 import online.kheops.proxy.multipart.MultipartStreamingWriter;
+import online.kheops.proxy.stow.GatewayException;
+import online.kheops.proxy.stow.Proxy;
+import online.kheops.proxy.stow.RequestException;
 import online.kheops.proxy.stow.authorization.AuthorizationManager;
 import online.kheops.proxy.tokens.AccessToken;
 import online.kheops.proxy.tokens.AccessTokenException;
@@ -105,9 +108,8 @@ public final class Resource {
         AuthorizationManager authorizationManager = new AuthorizationManager(authorizationURI, authorizationToken, albumId, studyInstanceUID);
 
         MultipartStreamingOutput multipartStreamingOutput = output -> {
-            Service stowService = new Service(output);
             try {
-                new Proxy(contentType, inputStream, stowService, authorizationManager);
+                new Proxy(contentType, inputStream, output, authorizationManager);
             } catch (GatewayException e) {
                 LOG.log(Level.SEVERE, "Gateway Error", e);
                 throw new WebApplicationException(Response.Status.BAD_GATEWAY);

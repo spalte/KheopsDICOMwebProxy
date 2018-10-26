@@ -6,7 +6,7 @@ import online.kheops.proxy.id.SeriesID;
 import online.kheops.proxy.part.MissingAttributeException;
 import online.kheops.proxy.part.Part;
 import online.kheops.proxy.stow.GatewayException;
-import online.kheops.proxy.stow.Resource;
+import online.kheops.proxy.stow.resource.Resource;
 import online.kheops.proxy.tokens.AuthorizationToken;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Sequence;
