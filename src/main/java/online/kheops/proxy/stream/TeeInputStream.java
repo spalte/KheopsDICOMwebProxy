@@ -38,10 +38,6 @@ public class TeeInputStream extends FilterInputStream {
 
     @Override
     public int read(final byte b[], final int off, final int len) throws IOException {
-        if (len == 0) {
-            return 0;
-        }
-
         final int readCount = super.read(b, off, len);
         if (readCount == -1) {
             return readCount;
@@ -66,7 +62,7 @@ public class TeeInputStream extends FilterInputStream {
         long skippedBytes = 0;
 
         while (skippedBytes < n) {
-            final int bytesToRead = (int) min(BUFFER_ARRAY_LENGTH, n);
+            final int bytesToRead = (int) min(BUFFER_ARRAY_LENGTH, n-skippedBytes);
             skippedBytes += read(bufferArray, 0, bytesToRead);
             if (bytesToRead < BUFFER_ARRAY_LENGTH) {
                 break;
