@@ -5,6 +5,7 @@ import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
 import online.kheops.proxy.multipart.MultipartStreamingOutput;
 import online.kheops.proxy.multipart.MultipartStreamingWriter;
+import online.kheops.proxy.stow.authorization.AuthorizationManager;
 import online.kheops.proxy.tokens.AccessToken;
 import online.kheops.proxy.tokens.AccessTokenException;
 import online.kheops.proxy.tokens.AuthorizationToken;

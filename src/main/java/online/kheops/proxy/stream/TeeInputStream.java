@@ -1,4 +1,4 @@
-package online.kheops.proxy.part;
+package online.kheops.proxy.stream;
 
 import java.io.*;
 
@@ -12,7 +12,7 @@ public class TeeInputStream extends FilterInputStream {
     private static final int BUFFER_ARRAY_LENGTH = 4096;
     private final byte[] bufferArray = new byte[BUFFER_ARRAY_LENGTH];
 
-    protected TeeInputStream(final InputStream inputStream, final OutputStream outputStream) throws IOException {
+    public TeeInputStream(final InputStream inputStream, final OutputStream outputStream) {
         super(inputStream);
         this.outputStream = outputStream;
     }

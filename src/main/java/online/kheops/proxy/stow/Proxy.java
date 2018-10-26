@@ -1,11 +1,12 @@
 package online.kheops.proxy.stow;
 
 import online.kheops.proxy.part.Part;
+import online.kheops.proxy.stow.authorization.AuthorizationManager;
+import online.kheops.proxy.stow.authorization.AuthorizationManagerException;
 import org.dcm4che3.mime.MultipartInputStream;
 import org.dcm4che3.mime.MultipartParser;
 
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;
